@@ -3,6 +3,7 @@ package com.amanaggarwal1.flashchat;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SearchRecentSuggestionsProvider;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -41,8 +42,6 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mPasswordView;
     private EditText mConfirmPasswordView;
     private FirebaseAuth mAuth;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +89,14 @@ public class RegisterActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        // Check for a valid username, if the user entered one.
         if(isEmpty(username)){
             mUsernameView.setError(getString(R.string.error_field_required));
             focusView = mUsernameView;
             cancel = true;
         }
+
+        // Check for a valid password, if the user entered one.
         if (password.length() < 6) {
             mPasswordView.setError(getString(R.string.error_short_password));
             focusView = mPasswordView;
@@ -138,23 +139,21 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createFirebaseUser(){
-        String username = mUsernameView.getText().toString();
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String username = mUsernameView.getText().toString();
+        final String email = mEmailView.getText().toString();
+        final String password = mPasswordView.getText().toString();
 
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(getString(R.string.logcat), "Create User onComplete : " + task.isSuccessful());
-                if (!task.isSuccessful()) {
-                    Log.d(getString(R.string.logcat), "User registration failed" );
-                    showErrorDailogBox("Registration failed\nPlease try again later");
-                }else{
+                if (task.isSuccessful()) {
                     saveDisplayName();
                     Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                    finish();
-                    startActivity(intent);
+                    loginAfterRegistration(username, email, password);
+                }else{
+                    Log.d(getString(R.string.logcat), "User registration failed" );
+                    showErrorDialog("Registration failed\nPlease try again later");
                     }
                 }
         });
@@ -166,7 +165,7 @@ public class RegisterActivity extends AppCompatActivity {
         preferences.edit().putString(DISPLAY_NAME_KEY, username).apply();
     }
 
-    private void showErrorDailogBox(String message){
+    private void showErrorDialog(String message){
         new AlertDialog.Builder(this)
                 .setTitle("Whoops")
                 .setMessage(message)
@@ -175,6 +174,25 @@ public class RegisterActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void loginAfterRegistration(final String username, String email, String password){
 
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                Log.d(getString(R.string.logcat), "SignIn onComplete : " + task.isSuccessful());
+                if(task.isSuccessful()){
+                    Toast.makeText(RegisterActivity.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterActivity.this, MainChatActivity.class);
+                    finish();
+                    startActivity(intent);
+                }else{
+                    Log.d(getString(R.string.logcat), "Problem while signing in : " + task.getException().getMessage());
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    finish();
+                    startActivity(intent);
+                }
+            }
+        });
+    }
 
 }
