@@ -1,47 +1,78 @@
 package com.amanaggarwal1.flashchat;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import static android.os.Build.VERSION_CODES.O;
+import static com.amanaggarwal1.flashchat.RegisterActivity.DISPLAY_NAME_KEY;
 
 
 public class MainChatActivity extends AppCompatActivity {
 
-    // TODO: Add member variables here:
+
     private String mDisplayName;
     private ListView mChatListView;
     private EditText mInputText;
     private ImageButton mSendButton;
+    private DatabaseReference mDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_chat);
 
-        // TODO: Set up the display name and get the Firebase reference
-
+        setupDisplayName();
 
         // Link the Views in the layout to the Java code
-        mInputText = (EditText) findViewById(R.id.messageInput);
-        mSendButton = (ImageButton) findViewById(R.id.sendButton);
-        mChatListView = (ListView) findViewById(R.id.chat_list_view);
+        mInputText = findViewById(R.id.messageInput);
+        mSendButton = findViewById(R.id.sendButton);
+        mChatListView = findViewById(R.id.chat_list_view);
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
-        // TODO: Send the message when the "enter" button is pressed
+        mInputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                sendMessage();
+                return true;
+            }
+        });
 
-
-        // TODO: Add an OnClickListener to the sendButton to send a message
-
+        mSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
     }
 
-    // TODO: Retrieve the display name from the Shared Preferences
+
+    private void setupDisplayName(){
+        SharedPreferences preferences = getSharedPreferences(RegisterActivity.CHAT_PREFS, 0);
+        mDisplayName = preferences.getString(RegisterActivity.DISPLAY_NAME_KEY, null);
+        if(mDisplayName.isEmpty()) mDisplayName = "Black Hat";
+    }
 
 
     private void sendMessage() {
-
-        // TODO: Grab the text the user typed in and push the message to Firebase
-
+        Log.d(getString(R.string.logcat), "Sending Message");
+        String message = mInputText.getText().toString();
+        if(!message.trim().isEmpty()){
+            InstantMessage newMessage = new InstantMessage(mDisplayName, message);
+            mDatabaseReference.child("messages").push().setValue(newMessage);
+            mInputText.setText(null);
+        }
     }
 
     // TODO: Override the onStart() lifecycle method. Setup the adapter here.
