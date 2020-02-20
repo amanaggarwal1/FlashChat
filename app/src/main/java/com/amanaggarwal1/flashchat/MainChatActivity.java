@@ -27,6 +27,7 @@ public class MainChatActivity extends AppCompatActivity {
     private EditText mInputText;
     private ImageButton mSendButton;
     private DatabaseReference mDatabaseReference;
+    private ChatListAdapter chatListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,7 @@ public class MainChatActivity extends AppCompatActivity {
     private void setupDisplayName(){
         SharedPreferences preferences = getSharedPreferences(RegisterActivity.CHAT_PREFS, 0);
         mDisplayName = preferences.getString(RegisterActivity.DISPLAY_NAME_KEY, null);
-        if(mDisplayName.isEmpty()) mDisplayName = "Black Hat";
+        if(mDisplayName.equals("")) mDisplayName = "Black Hat";
     }
 
 
@@ -75,15 +76,20 @@ public class MainChatActivity extends AppCompatActivity {
         }
     }
 
-    // TODO: Override the onStart() lifecycle method. Setup the adapter here.
+    @Override
+    public void onStart(){
+        super.onStart();
 
+        chatListAdapter = new ChatListAdapter(this, mDatabaseReference, mDisplayName);
+        mChatListView.setAdapter(chatListAdapter);
+    }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        // TODO: Remove the Firebase event listener on the adapter.
-
+        //Remove the Firebase event listener on the adapter.
+        chatListAdapter.freeUp();
     }
 
 }

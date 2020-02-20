@@ -11,7 +11,7 @@ public class InstantMessage {
 
     public InstantMessage(){
         author = "Black Hat";
-        message = "Some Error";
+        message = "This message was not intended";
     }
     public String getAuthor(){
         return author;

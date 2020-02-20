@@ -17,6 +17,7 @@
         android:layout_alignParentTop="true"
         android:divider="@null"
         android:dividerHeight="0dp"
+        android:paddingBottom="20dp"
         android:transcriptMode="alwaysScroll" />
 
     <LinearLayout
@@ -34,6 +35,7 @@
             android:layout_weight="1"
             android:textColor="@color/black"
             android:textColorHint="@color/black"
+            android:autofillHints="@string/prompt_msg"
             android:hint="@string/prompt_msg"
             android:imeActionLabel="@string/action_send"
             android:imeOptions="actionUnspecified"
