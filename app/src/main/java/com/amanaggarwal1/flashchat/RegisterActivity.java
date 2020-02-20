@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SearchRecentSuggestionsProvider;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.Map;
 import java.util.Set;
@@ -160,9 +163,24 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void saveDisplayName(){
+        FirebaseUser user = mAuth.getCurrentUser();
         String username = mUsernameView.getText().toString();
-        SharedPreferences preferences = getSharedPreferences(CHAT_PREFS, 0);
-        preferences.edit().putString(DISPLAY_NAME_KEY, username).apply();
+
+        if(user != null) {
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(username)
+                    .build();
+
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d(getString(R.string.logcat), "Username updated.");
+                            }
+                        }
+                    });
+        }
     }
 
     private void showErrorDialog(String message){

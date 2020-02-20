@@ -2,6 +2,7 @@ package com.amanaggarwal1.flashchat;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.SurfaceTexture;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,7 @@ public class ChatListAdapter extends BaseAdapter {
     private Activity mActivity;
     private DatabaseReference mDatabaseReference;
     private String mDisplayName;
+    private String mUerEmailAddress;
     private ArrayList<DataSnapshot> mSnapshotList;
 
     private ChildEventListener mListener = new ChildEventListener() {
@@ -58,17 +60,18 @@ public class ChatListAdapter extends BaseAdapter {
         }
     };
 
-    public ChatListAdapter(Activity activity, DatabaseReference reference, String name){
+    public ChatListAdapter(Activity activity, DatabaseReference reference, String name, String email){
         mActivity = activity;
         mDatabaseReference = reference.child("messages");
         mDatabaseReference.addChildEventListener(mListener);
         mDisplayName = name;
+        mUerEmailAddress = email;
         mSnapshotList = new ArrayList<>();
     }
 
     static class ViewHolder{
-        TextView author;
-        TextView chat;
+        TextView authorName;
+        TextView chatMessage;
         LinearLayout.LayoutParams params;
     }
 
@@ -96,9 +99,9 @@ public class ChatListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.chat_msg_row, parent, false);
 
             final ViewHolder holder = new ViewHolder();
-            holder.author = convertView.findViewById(R.id.author);
-            holder.chat = convertView.findViewById(R.id.message);
-            holder.params = (LinearLayout.LayoutParams) holder.author.getLayoutParams();
+            holder.authorName = convertView.findViewById(R.id.author);
+            holder.chatMessage = convertView.findViewById(R.id.message);
+            holder.params = (LinearLayout.LayoutParams) holder.authorName.getLayoutParams();
 
             convertView.setTag(holder);
         }
@@ -106,11 +109,11 @@ public class ChatListAdapter extends BaseAdapter {
         final InstantMessage message = getItem(position);
         final ViewHolder holder = (ViewHolder) convertView.getTag();
 
-        boolean isMe = message.getAuthor().equals(mDisplayName);
+        boolean isMe = message.getAuthorEmail().equals(mUerEmailAddress);
         setChatRowAppearance(isMe, holder);
 
-        holder.author.setText(message.getAuthor());
-        holder.chat.setText(message.getMessage());
+        holder.authorName.setText(message.getAuthorName());
+        holder.chatMessage.setText(message.getMessage());
 
         return convertView;
     }
@@ -118,19 +121,17 @@ public class ChatListAdapter extends BaseAdapter {
     private void setChatRowAppearance(boolean isMe, ViewHolder holder) {
         if(isMe){
             holder.params.gravity = Gravity.END;
-            holder.author.setTextColor(Color.GREEN);
-            holder.chat.setBackgroundResource(R.drawable.bubble2);
+            holder.authorName.setTextColor(Color.GREEN);
+            holder.chatMessage.setBackgroundResource(R.drawable.bubble2);
         }else{
             holder.params.gravity = Gravity.START;
-            holder.author.setTextColor(Color.BLUE);
-            holder.chat.setBackgroundResource(R.drawable.bubble1);
+            holder.authorName.setTextColor(Color.BLUE);
+            holder.chatMessage.setBackgroundResource(R.drawable.bubble1);
         }
 
-        holder.author.setLayoutParams(holder.params);
-        holder.chat.setLayoutParams(holder.params);
+        holder.authorName.setLayoutParams(holder.params);
+        holder.chatMessage.setLayoutParams(holder.params);
     }
-
-
 
     public void freeUp(){ mDatabaseReference.removeEventListener(mListener);}
 }

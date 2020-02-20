@@ -12,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -23,6 +25,7 @@ public class MainChatActivity extends AppCompatActivity {
 
 
     private String mDisplayName;
+    private String mUserEmailAddress;
     private ListView mChatListView;
     private EditText mInputText;
     private ImageButton mSendButton;
@@ -60,9 +63,9 @@ public class MainChatActivity extends AppCompatActivity {
 
 
     private void setupDisplayName(){
-        SharedPreferences preferences = getSharedPreferences(RegisterActivity.CHAT_PREFS, 0);
-        mDisplayName = preferences.getString(RegisterActivity.DISPLAY_NAME_KEY, null);
-        if(mDisplayName.equals("")) mDisplayName = "Black Hat";
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDisplayName = user.getDisplayName();
+        mUserEmailAddress = user.getEmail();
     }
 
 
@@ -70,7 +73,7 @@ public class MainChatActivity extends AppCompatActivity {
         Log.d(getString(R.string.logcat), "Sending Message");
         String message = mInputText.getText().toString();
         if(!message.trim().isEmpty()){
-            InstantMessage newMessage = new InstantMessage(mDisplayName, message);
+            InstantMessage newMessage = new InstantMessage( mUserEmailAddress, mDisplayName, message);
             mDatabaseReference.child("messages").push().setValue(newMessage);
             mInputText.setText(null);
         }
@@ -80,7 +83,7 @@ public class MainChatActivity extends AppCompatActivity {
     public void onStart(){
         super.onStart();
 
-        chatListAdapter = new ChatListAdapter(this, mDatabaseReference, mDisplayName);
+        chatListAdapter = new ChatListAdapter(this, mDatabaseReference, mDisplayName, mUserEmailAddress);
         mChatListView.setAdapter(chatListAdapter);
     }
 

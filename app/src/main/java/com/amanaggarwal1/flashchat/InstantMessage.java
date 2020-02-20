@@ -1,22 +1,32 @@
 package com.amanaggarwal1.flashchat;
 
 public class InstantMessage {
-    private String author;
+    private String authorEmail;
+    private String authorName;
     private String message;
 
-    public InstantMessage(String author, String message){
-        this.author = author;
+
+    public InstantMessage( String email, String author, String message){
+        authorName = author;
         this.message = message;
+        authorEmail = email;
     }
 
     public InstantMessage(){
-        author = "Black Hat";
+        authorEmail = "Some Bug";
+        authorName = "Black Hat";
         message = "This message was not intended";
     }
-    public String getAuthor(){
-        return author;
+
+    public String getAuthorEmail(){
+        return authorEmail;
+    }
+
+    public String getAuthorName(){
+        return authorName;
     }
     public String getMessage(){
         return message;
     }
+
 }
