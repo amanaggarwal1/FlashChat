@@ -106,12 +106,29 @@ public class ChatListAdapter extends BaseAdapter {
         final InstantMessage message = getItem(position);
         final ViewHolder holder = (ViewHolder) convertView.getTag();
 
+        boolean isMe = message.getAuthor().equals(mDisplayName);
+        setChatRowAppearance(isMe, holder);
+
         holder.author.setText(message.getAuthor());
         holder.chat.setText(message.getMessage());
 
         return convertView;
     }
 
+    private void setChatRowAppearance(boolean isMe, ViewHolder holder) {
+        if(isMe){
+            holder.params.gravity = Gravity.END;
+            holder.author.setTextColor(Color.GREEN);
+            holder.chat.setBackgroundResource(R.drawable.bubble2);
+        }else{
+            holder.params.gravity = Gravity.START;
+            holder.author.setTextColor(Color.BLUE);
+            holder.chat.setBackgroundResource(R.drawable.bubble1);
+        }
+
+        holder.author.setLayoutParams(holder.params);
+        holder.chat.setLayoutParams(holder.params);
+    }
 
 
 
