@@ -40,6 +40,12 @@ public class LoginActivity extends AppCompatActivity {
         mPasswordView = findViewById(R.id.login_password);
         mAuth = FirebaseAuth.getInstance();
 
+        if(mAuth.getCurrentUser() != null){
+            Intent intent = new Intent(LoginActivity.this, MainChatActivity.class);
+            finish();
+            startActivity(intent);
+        }
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
